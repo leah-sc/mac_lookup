@@ -30,18 +30,35 @@ function get_xml_tag tag
 	done
 }
 
+function process_serial serial
+# Process serial number into the proper format required by the Apple support API
+{
+	local serial="${1:?}"
+
+	case	"$serial"
+	in
+	(W*)	# S/Ns starting with W need to be resolved by their last three
+		# characters
+	    	serial="${serial:$#serial - 3:3}"
+	;;
+	(*)	serial="${serial:$#serial - 4:4}"
+	;;
+	esac
+
+	print -- "$serial"
+}
+
 function main
 # Read serial numbers from STDIN, spit out model names
 {
 	while	read -r SERIAL
 	do
-		local LAST4DIGITS="${SERIAL:$#SERIAL - 4:4}"
+		: "$(process_serial "$SERIAL")"
 
 		curl -sSL \
 		     -w '\n' \
-		     -X GET "${APPLE_SUPPORT_URL}${LAST4DIGITS}"
+		     -X GET "${APPLE_SUPPORT_URL}${_}"
 
-		unset LAST4DIGITS
 	done | get_xml_tag configCode
 }
 
