@@ -5,7 +5,8 @@
 
 # Set sane defaults
 emulate -L zsh
-set -eu
+# Set -eu if not running interactively
+[[ -o interactive ]] || set -eu
 
 : ${APPLE_SUPPORT_URL:="https://support-sp.apple.com/sp/product?cc="}
 readonly APPLE_SUPPORT_URL
